@@ -85,14 +85,14 @@ import Container from "./Container.astro"
     const currentWordLength = currentWord.length;
 
     if (isDeleting) {
-      playHeading.innerHTML = `Transformin the way you <span style="color: lime">${currentWord.substring(0, currentLetterIndex)}</span>|`;
+      playHeading.innerHTML = `Reshaping the  way you: <span style="color: lime"><br>${currentWord.substring(0, currentLetterIndex)}</span>|`;
 
       currentLetterIndex--;
       if (currentLetterIndex === 0) {
         isDeleting = false;
       }
     } else {
-      playHeading.innerHTML = `Transformin the way you <span style="color: lime">${currentWord.substring(0, currentLetterIndex)}</span>|`;
+      playHeading.innerHTML = `Reshaping the way you: <span style="color: lime"><br>${currentWord.substring(0, currentLetterIndex)}</span>|`;
 
       currentLetterIndex++;
       if (currentLetterIndex > currentWordLength) {
