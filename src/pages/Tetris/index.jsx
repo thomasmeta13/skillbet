@@ -405,7 +405,6 @@ const Tetris = () => {
 				onKeyDown={keyDown}
 				onClick={() => rotatePlayer()}
 				{...bind()}
-				style={{transform: "rotate(180deg)"}}
 			/>
 		</div>
 	);
