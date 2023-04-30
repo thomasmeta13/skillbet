@@ -26,7 +26,7 @@ const Header = () => {
               custom-2xl:flex-row xl:flex-row lg:flex-col md:flex-col sm:flex-col
               justify-between
               border-b-[1px] border-semiSplitter
-              custom-2xl:h-[92px] xl:h-[92px] lg:h-[144px] md:h-[144px] sm:h-[144px] xs:h-[92px]
+              custom-2xl:h-[80px] xl:h-[80px] lg:h-[80px] md:h-[80px] sm:h-[80px] xs:h-[80px]
               w-full
             "
         >
