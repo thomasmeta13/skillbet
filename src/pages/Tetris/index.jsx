@@ -389,24 +389,26 @@ const Tetris = () => {
 			</Center>
 		);
 	return (
-		<Stage
-			time={time}
-			lose={gameOver}
-			setLose={setGameOver}
-			restartClick={() => restartGame()}
-			map={map}
-			player={player}
-			hint={hintPlayer}
-			paused={pause}
-			status={{ lines, score, level }}
-			onBlur={() => setPause(true)}
-			onFocus={() => setPause(false)}
-			tabIndex="0"
-			onKeyUp={keyUp}
-			onKeyDown={keyDown}
-			onClick={() => rotatePlayer()}
-			{...bind()}
-		/>
+		<div style={{ height: '100vh', overflow: 'hidden' }}>
+			<Stage
+				time={time}
+				lose={gameOver}
+				setLose={setGameOver}
+				restartClick={() => restartGame()}
+				map={map}
+				player={player}
+				hint={hintPlayer}
+				paused={pause}
+				status={{ lines, score, level }}
+				onBlur={() => setPause(true)}
+				onFocus={() => setPause(false)}
+				tabIndex="0"
+				onKeyUp={keyUp}
+				onKeyDown={keyDown}
+				onClick={() => rotatePlayer()}
+				{...bind()}
+			/>
+		</div>
 	);
 };
 
