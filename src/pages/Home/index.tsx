@@ -48,6 +48,11 @@ const Home = () => {
   }
 
   return (
+    <Layout
+      banner={
+        <ExploreBanner />
+      }
+    >
       <div className="">
         <GeneralModal 
           open={modalOpen}
@@ -80,6 +85,7 @@ const Home = () => {
           <LeaderBoard />
         </div>
       </div>
+    </Layout>
   );
 }
 export default Home;

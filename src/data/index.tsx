@@ -4,7 +4,27 @@ export const HeaderMenuTitles = [
   {
       name: 'Explore',
       link: 'explore',
-  }
+  },
+  {/*{
+      name: 'Marketplace',
+      link: 'marketplace',
+  },
+  {
+      name: 'Communities',
+      link: 'community',
+  },
+  {
+      name: 'Live now',
+      link: 'experience',
+  },
+  {
+      name: 'Games',
+      link: 'games',
+  },
+  {
+      name: 'Quests',
+      link: 'quests',
+  }*/}
 ]
 
 export const EXPLORE_BANNER_SLIDES: SliderType[] = [

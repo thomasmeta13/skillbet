@@ -14,4 +14,4 @@ const socket = () => {
         options
     )
 }
-export default socket
+export default socket;

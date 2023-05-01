@@ -8,6 +8,7 @@ import routes from './routes/routes';
 import Header from './components/Layout/Header';
 import { useEffect } from 'react';
 import socket from './utils/socket-client';
+import FourZeroFour from './pages/FourZeroFour';
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
           {routes.map((route: RouteProps) => (
             <Route key={`routes-${route.path}`} {...route} />
           ))}
+          <Route key={`routes-404`} path="*" Component={FourZeroFour} />
        </Routes>
       </Router>
     </div>

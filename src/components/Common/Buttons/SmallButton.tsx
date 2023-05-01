@@ -14,7 +14,6 @@ const SmallButton = (props: ButtonProps) => {
         <button
             className={`solarity-button font-light text-[16px] bg-primary text-white py-1.5 pt-2 px-4 rounded-[12px] mb-[15px] text-center inline-flex items-center ${props.styles}`}
             onClick={props.onClick}
-            style={{marginTop:"60px"}}
         >
             {props.icon ? props.icon : ''}
             <span>{props.caption}</span>

@@ -12,14 +12,14 @@ const ExploreBanner = () => {
             showStatus={false}
             showArrows={false}
         >
-            {EXPLORE_BANNER_SLIDES.map((slider: SliderType, index: number) => (
+            {/*{EXPLORE_BANNER_SLIDES.map((slider: SliderType, index: number) => (
                 <BannerSlide
                     {...slider}
                     key={index}
                     index={index}
                     type={'game'}
                 />
-            ))}
+            ))}*/}
         </Carousel>
     )
 }

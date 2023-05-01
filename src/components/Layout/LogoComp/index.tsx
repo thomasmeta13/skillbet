@@ -11,7 +11,7 @@ const LogoComp = () => {
                 />
             </div>
             <h1 className="pl-5 pt-1 font-semibold text-[30px] text-[#BCBCBC]">
-                QUESTIFY
+                Questify
             </h1>
         </div>
     )

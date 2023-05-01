@@ -93,18 +93,16 @@ const getRandomBloco = () => {
 };
 const getRandomPlayer = player => {
 	let bloco, next;
-	if (player && player.next) {
-	  bloco = JSON.parse(JSON.stringify(player.next));
-	  next = getRandomBloco();
-	}
+	if (player)
+		if (player.next) {
+			bloco = JSON.parse(JSON.stringify(player.next));
+			next = getRandomBloco();
+		}
 	if (!bloco) bloco = getRandomBloco();
 	if (!next) next = getRandomBloco();
-	const pos = [STAGE_HEIGHT - bloco.bloco.length, Math.floor(STAGE_WIDTH / 2 - bloco.bloco[0].length / 2)];
+	const pos = [0, Math.floor(STAGE_WIDTH / 2 - 2 / 2)];
 	return { pos, bloco, next };
-  };
-  
-  
-
+};
 
 const Game = () => {
 	const [map, setMap] = useState(initialMap);
@@ -146,39 +144,24 @@ const Game = () => {
 
 	const drop = () => {
 		if (!player) {
-		  setPlayer(getRandomPlayer());
-		  return;
+			setPlayer(getRandomPlayer());
+			return;
 		}
 		setPlayer(player => {
-		  const newPos = getNewPlayerPos("up"); // Change to "up" instead of "down"
-		  if (player.pos === newPos) {
-			setMap(map => {
-			  const mapWithPlayer = PrintPlayerInMap(player, map);
-			  const mapCleared = checkMap(mapWithPlayer);
-			  return mapCleared;
-			});
-			const newPlayer = getRandomPlayer(player);
-			if (!validatePosition(newPlayer.pos, newPlayer.bloco)) loseGame();
-			return newPlayer;
-		  }
-		  return { ...player, pos: newPos };
+			const newPos = getNewPlayerPos("down");
+			if (player.pos === newPos) {
+				setMap(map => {
+					const mapWithPlayer = PrintPlayerInMap(player, map);
+					const mapCleared = checkMap(mapWithPlayer);
+					return mapCleared;
+				});
+				const newPlayer = getRandomPlayer(player);
+				if (!validatePosition(newPlayer.pos, newPlayer.bloco)) loseGame();
+				return newPlayer;
+			}
+			return { ...player, pos: newPos };
 		});
-	  };
-	  
-	  const getNewPlayerPos = React.useCallback(
-		movement => {
-		  let newPos;
-		  if (!player) return;
-		  if (movement === "up") newPos = [player.pos[0] - 1, player.pos[1]]; // Change to subtract 1 from the y-coordinate
-		  if (movement === "left") newPos = [player.pos[0], player.pos[1] - 1];
-		  if (movement === "right") newPos = [player.pos[0], player.pos[1] + 1];
-		  if (!validatePosition(newPos, player.bloco)) return player.pos;
-		  return newPos;
-		},
-		[player, validatePosition]
-	  );
-	  
-	
+	};
 
 	const rotatePlayer = () => {
 		const clonedPlayer = JSON.parse(JSON.stringify(player));
@@ -249,62 +232,58 @@ const Game = () => {
 
 	const checkMap = React.useCallback(
 		map => {
-		  let rowsClear = [];
-		  map.forEach((row, y) => {
-			let clear = true;
-			row.forEach((pixel, x) => {
-			  if (pixel.fill === 0) {
-				clear = false;
-			  }
+			let rowsClear = [];
+			map.forEach((row, y) => {
+				let clear = true;
+				row.forEach((pixel, x) => {
+					if (pixel.fill === 0) clear = false;
+				});
+				if (clear) rowsClear.push(y);
 			});
-			if (clear) {
-			  rowsClear.push(y);
-			}
-		  });
-		  if (rowsClear.length > 0) {
-			const newMap = map.slice();
-			rowsClear.forEach(y => {
-			  newMap[y] = [...new Array(STAGE_WIDTH)].map(() => ({ fill: 0, color: [] }));
-			});
-			setlines(quant => quant + rowsClear.length);
-			const bonusLevel = 100 * (level * level);
-			const bonusRows = 40 * (rowsClear.length * rowsClear.length - 1);
-			setScore(score => score + 300 * rowsClear.length + bonusRows + bonusLevel);
-			return newMap;
+			if (rowsClear.length > 0) {
+				let newMap = map.slice();
+				rowsClear.forEach(y => {
+					for (let mapY = newMap.length - 1; mapY >= 0; mapY--)
+						if (mapY <= y)
+							if (mapY > 0) newMap[mapY] = newMap[mapY - 1];
+							else
+								newMap[mapY] = [...new Array(STAGE_WIDTH)].map(() => ({
+									fill: 0,
+									color: []
+								}));
+				});
+				setlines(quant => quant + rowsClear.length);
+				const bonusLevel = 100 * (level * level);
+				const bonusRows = 40 * (rowsClear.length * rowsClear.length - 1);
+				setScore(score => score + 300 * rowsClear.length + bonusRows + bonusLevel);
+				return newMap;
 			}
 			return map;
-			},
-			[level]
-			);
-				
+		},
+		[level]
+	);
 
-		const validatePosition = React.useCallback(
-			(pos, bloco) => {
-				for (let y = 0; y < bloco.bloco.length; y++) {
-				for (let x = 0; x < bloco.bloco[y].length; x++) {
+	const validatePosition = React.useCallback(
+		(pos, bloco) => {
+			for (let y = 0; y < bloco.bloco.length; y++)
+				for (let x = 0; x < bloco.bloco[y].length; x++)
 					if (bloco.bloco[y][x] === 1) {
-					const mapY = pos[0] + y;
-					const mapX = pos[1] + x;
-					if (
-						mapY < 0 ||
-						mapY >= STAGE_HEIGHT ||
-						mapX < 0 ||
-						mapX >= STAGE_WIDTH ||
-						!map[mapY] ||
-						!map[mapY][mapX] ||
-						map[mapY][mapX].fill === 1
-					) {
-						return false;
+						let mapY = pos[0] + y;
+						let mapX = pos[1] + x;
+						if (
+							mapY > STAGE_HEIGHT ||
+							mapX < 0 ||
+							mapX > STAGE_WIDTH ||
+							!map[mapY] ||
+							!map[mapY][mapX] ||
+							map[mapY][mapX].fill === 1
+						)
+							return false;
 					}
-					}
-				}
-				}
-				return true;
-			},
-			[map]
-			);
-					  
-						  
+			return true;
+		},
+		[map]
+	);
 
 	const calculateHintPlayer = React.useCallback(
 		player => {
@@ -392,9 +371,6 @@ const Game = () => {
 			onKeyUp={keyUp}
 			onKeyDown={keyDown}
 			onClick={() => rotatePlayer()}
-			style={{
-				transform: 'rotateX(180deg)', // add this line to apply the rotation
-			  }}		
 			{...bind()}
 		/>
 	);
