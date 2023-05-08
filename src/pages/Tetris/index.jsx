@@ -57,17 +57,17 @@ const T = {
 
 const J = {
 	bloco: [
-		[0, 1, 0],
-		[0, 1, 0],
-		[1, 1, 0]
+		[0, 0, 0],
+		[1, 1, 1],
+		[0, 0, 1]
 	]
 };
 
 const L = {
 	bloco: [
-		[0, 1, 0],
-		[0, 1, 0],
-		[0, 1, 1]
+		[0, 0, 0],
+		[1, 1, 1],
+		[1, 0, 0]
 	]
 };
 
@@ -88,11 +88,25 @@ const Z = {
 };
 
 const getRandomBloco = () => {
-	const blocos = [I, O, T, J, L, S, Z];
-	const bloco = blocos[Math.floor(Math.random() * blocos.length)];
+	if (!getRandomBloco.bag || getRandomBloco.bag.length === 0) {
+    // If the bag is empty, refill it with a new sequence of pieces
+    getRandomBloco.bag = shuffle([I, O, T, J, L, S, Z]);
+  }
+	const bloco = getRandomBloco.bag.shift();
+	console.log(getRandomBloco.bag);
 	bloco.color = colors[Math.floor(Math.random() * colors.length)];
 	return bloco;
 };
+
+const shuffle = (array) => {
+  const shuffledArray = [...array];
+  for (let i = shuffledArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+  }
+  return shuffledArray;
+};
+
 const getRandomPlayer = player => {
 	let bloco, next;
 	if (player)
@@ -207,7 +221,7 @@ const Tetris = () => {
 	const keyUp = ({ keyCode }) => {
 		if (pause || gameOver)
 			return;
-		const THRESHOLD = 80;
+		const THRESHOLD = 10;
 		// Activate the interval again when user releases down arrow.
 		if (keyCode === 40) {
 			setDown(false);
