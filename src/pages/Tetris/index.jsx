@@ -208,6 +208,16 @@ const Tetris = () => {
 		});
 	};
 
+	const rotateLeft = matrix => {
+		const mtrx = matrix.map((_, index) => matrix.map(column => column[index]));
+		return mtrx.map(row => row.reverse());
+	  };
+	  
+	  const rotateRight = matrix => {
+		const mtrx = matrix.map((_, index) => matrix.map(column => column[index])).reverse();
+		return mtrx;
+	  };
+	  
 	const rotatePlayer = () => {
 		const clonedPlayer = JSON.parse(JSON.stringify(player));
 		let mtrx = clonedPlayer.bloco.bloco.map((_, index) =>
@@ -248,32 +258,38 @@ const Tetris = () => {
 	};
 
 	const keyDown = ({ keyCode }) => {
-		if (pause || gameOver)
-			return;
+		if (pause || gameOver) return;
 		switch (keyCode) {
-			case 37:
-				setPlayer(player => ({ ...player, pos: getNewPlayerPos("left") }));
-				break;
-			case 38:
-				rotatePlayer();
-				break;
-			case 39:
-				setPlayer(player => ({ ...player, pos: getNewPlayerPos("right") }));
-				break;
-			case 40:
-				setTick(Date.now());
-				setDown(true);
-				break;
-			case 32:
-				if (spaceReleased) {
-					setSpaceReleased(false);
-					forwardDown();
-				}
-				break;
-			default:
-				break;
+		  case 37:
+			setPlayer(player => ({ ...player, pos: getNewPlayerPos("left") }));
+			break;
+		  case 38:
+			rotatePlayer();
+			break;
+		  case 39:
+			setPlayer(player => ({ ...player, pos: getNewPlayerPos("right") }));
+			break;
+		  case 40:
+			setTick(Date.now());
+			setDown(true);
+			break;
+		  case 32:
+			if (spaceReleased) {
+			  setSpaceReleased(false);
+			  forwardDown();
+			}
+			break;
+		  case 88: // X key
+			setPlayer(player => ({ ...player, bloco: { ...player.bloco, bloco: rotateLeft(player.bloco.bloco) } }));
+			break;
+		  case 90: // Z key
+			setPlayer(player => ({ ...player, bloco: { ...player.bloco, bloco: rotateRight(player.bloco.bloco) } }));
+			break;
+		  default:
+			break;
 		}
-	};
+	  };
+	  
 
 	const checkMap = React.useCallback(
 		map => {
