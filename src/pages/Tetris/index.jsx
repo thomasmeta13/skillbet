@@ -208,12 +208,22 @@ const Tetris = () => {
 		});
 	};
 
-	const rotatePlayer = () => {
+	const rotatePlayer = (flag) => {
 		const clonedPlayer = JSON.parse(JSON.stringify(player));
 		let mtrx = clonedPlayer.bloco.bloco.map((_, index) =>
 			clonedPlayer.bloco.bloco.map(column => column[index])
 		);
 		mtrx = mtrx.map(row => row.reverse());
+		if(flag) {
+			mtrx = mtrx.map((_, index) =>
+				mtrx.map(column => column[index])
+			);
+			mtrx = mtrx.map(row => row.reverse());
+			mtrx = mtrx.map((_, index) =>
+				mtrx.map(column => column[index])
+			);
+			mtrx = mtrx.map(row => row.reverse());
+		}
 		if (validatePosition(player.pos, { bloco: mtrx }))
 			setPlayer({ ...player, bloco: { ...player.bloco, bloco: mtrx } });
 	};
@@ -255,7 +265,13 @@ const Tetris = () => {
 				setPlayer(player => ({ ...player, pos: getNewPlayerPos("left") }));
 				break;
 			case 38:
-				rotatePlayer();
+				rotatePlayer(false);
+				break;
+			case 88:
+				rotatePlayer(false);
+				break;
+			case 90:
+				rotatePlayer(true);
 				break;
 			case 39:
 				setPlayer(player => ({ ...player, pos: getNewPlayerPos("right") }));
@@ -418,7 +434,7 @@ const Tetris = () => {
 				tabIndex="0"
 				onKeyUp={keyUp}
 				onKeyDown={keyDown}
-				onClick={() => rotatePlayer()}
+				onClick={() => rotatePlayer(false)}
 				{...bind()}
 			/>
 		</div>
