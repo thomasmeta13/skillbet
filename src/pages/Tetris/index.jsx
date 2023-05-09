@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useDrag } from "react-use-gesture";
 import BarLoader from "react-spinners/BarLoader";
 import { useWallet } from '@sei-js/react';
@@ -93,6 +93,7 @@ const getRandomBloco = () => {
     getRandomBloco.bag = shuffle([I, O, T, J, L, S, Z]);
   }
 	const bloco = getRandomBloco.bag.shift();
+	console.log(getRandomBloco.bag);
 	bloco.color = colors[Math.floor(Math.random() * colors.length)];
 	return bloco;
 };
@@ -120,13 +121,13 @@ const getRandomPlayer = player => {
 };
 
 const Tetris = () => {
+	const { accounts } = useWallet();
 	const [map, setMap] = useState(initialMap);
 	const [player, setPlayer] = useState();
 	const [down, setDown] = useState(false);
 	const [pause, setPause] = useState(false);
 	const [tick, setTick] = useState(Date.now());
 	const [hintPlayer, setHintPlayer] = useState();
-	const hintRef = useRef(hintPlayer);
 	const [spaceReleased, setSpaceReleased] = useState(true);
 	const [lines, setlines] = useState(0);
 	const [score, setScore] = useState(0);
@@ -136,98 +137,6 @@ const Tetris = () => {
 	const [gameOver, setGameOver] = useState(false);
 	const [time, setTime] = useState(120);
 	const [clearIn, setClearIn] = useState(null);
-	const keyList = {
-		37: true,
-		38: true,
-		39: true,
-		40: true,
-		32: true,
-		88: true,
-		90: true,
-	}
-
-	useEffect(() => {
-		hintRef.current = hintPlayer;
-	}, [hintPlayer])
-
-	const keyMap = (keyCode) => {
-		if (pause || gameOver)
-			return;
-		switch(keyCode) {
-			case 37:
-				setPlayer(player => ({ ...player, pos: getNewPlayerPos("left", player) }));
-				break;
-			case 38:
-				rotatePlayer(false);
-				break;
-			case 88:
-				rotatePlayer(false);
-				break;
-			case 90:
-				rotatePlayer(true);
-				break;
-			case 39:
-				setPlayer(player => ({ ...player, pos: getNewPlayerPos("right", player) }));
-				break;
-			case 40:
-				setTick(Date.now());
-				setDown(true);
-				break;
-			case 32:
-				if (spaceReleased) {
-					setSpaceReleased(false);
-					forwardDown();
-				}
-				break;
-		}
-	}
-	
-  const initialDelay = 200;
-  const repeatRate = 0;
-
-  useEffect(() => {
-    let timeoutId = null;
-    let intervalId = null;
-
-    const keydownHandler = (event) => {
-      if (keyList[event.keyCode]) {
-        event.preventDefault();
-
-        if (!timeoutId) {
-          keyMap(event.keyCode);
-          timeoutId = setTimeout(() => {
-            intervalId = setInterval(() => keyMap(event.keyCode), repeatRate);
-          }, initialDelay);
-        }
-      }
-    };
-
-    const keyupHandler = (event) => {
-      if (keyList[event.keyCode]) {
-        event.preventDefault();
-				clearTimeout(timeoutId);
-				clearInterval(intervalId);
-				timeoutId = null;
-				intervalId = null;
-				if (pause || gameOver)
-					return;
-				const THRESHOLD = 10;
-				// Activate the interval again when user releases down arrow.
-				if (event.keyCode === 40) {
-					setDown(false);
-					if (Date.now() - tick <= THRESHOLD) drop();
-				}
-				if (event.keyCode === 32) setSpaceReleased(true);
-      }
-    };
-    window.addEventListener('keydown', keydownHandler);
-    window.addEventListener('keyup', keyupHandler);
-
-    return () => {
-			window.removeEventListener('keydown', keydownHandler);
-      window.removeEventListener('keyup', keyupHandler);
-    };
-  }, []);
 
 	useEffect(() => {
 		if(!clearIn) {
@@ -284,7 +193,7 @@ const Tetris = () => {
 			return;
 		}
 		setPlayer(player => {
-			const newPos = getNewPlayerPos("down", player);
+			const newPos = getNewPlayerPos("down");
 			if (player.pos === newPos) {
 				setMap(map => {
 					const mapWithPlayer = PrintPlayerInMap(player, map);
@@ -299,29 +208,14 @@ const Tetris = () => {
 		});
 	};
 
-	const rotatePlayer = (flag) => {
-		setPlayer(player => {
-			const clonedPlayer = JSON.parse(JSON.stringify(player));
-			let mtrx = clonedPlayer.bloco.bloco.map((_, index) =>
-				clonedPlayer.bloco.bloco.map(column => column[index])
-			);
-			mtrx = mtrx.map(row => row.reverse());
-			if(flag) {
-				mtrx = mtrx.map((_, index) =>
-					mtrx.map(column => column[index])
-				);
-				mtrx = mtrx.map(row => row.reverse());
-				mtrx = mtrx.map((_, index) =>
-					mtrx.map(column => column[index])
-				);
-				mtrx = mtrx.map(row => row.reverse());
-			}
-			if (validatePosition(player.pos, { bloco: mtrx })) {
-				return { ...player, bloco: { ...player.bloco, bloco: mtrx } };
-			} else {
-				return { ...player };
-			}
-		})
+	const rotatePlayer = () => {
+		const clonedPlayer = JSON.parse(JSON.stringify(player));
+		let mtrx = clonedPlayer.bloco.bloco.map((_, index) =>
+			clonedPlayer.bloco.bloco.map(column => column[index])
+		);
+		mtrx = mtrx.map(row => row.reverse());
+		if (validatePosition(player.pos, { bloco: mtrx }))
+			setPlayer({ ...player, bloco: { ...player.bloco, bloco: mtrx } });
 	};
 
 	const keyUp = ({ keyCode }) => {
@@ -337,24 +231,20 @@ const Tetris = () => {
 	};
 
 	const forwardDown = () => {
-		try {
-			if (pause || gameOver)
-				return;
-			setPlayer(player => {
-				const playerCopy = JSON.parse(JSON.stringify(player));
-				playerCopy.pos = [...hintRef.current.pos];
-				setMap(map => {
-					const mapWithPlayer = PrintPlayerInMap(playerCopy, map);
-					const mapCleared = checkMap(mapWithPlayer);
-					return mapCleared;
-				});
-				const newPlayer = getRandomPlayer(player);
-				if (!validatePosition(newPlayer.pos, newPlayer.bloco)) loseGame();
-				return newPlayer;
+		if (pause || gameOver)
+			return;
+		setPlayer(player => {
+			const playerCopy = JSON.parse(JSON.stringify(player));
+			playerCopy.pos = [...hintPlayer.pos];
+			setMap(map => {
+				const mapWithPlayer = PrintPlayerInMap(playerCopy, map);
+				const mapCleared = checkMap(mapWithPlayer);
+				return mapCleared;
 			});
-		} catch (error) {
-			console.log('forwardDown', error.message);
-		}
+			const newPlayer = getRandomPlayer(player);
+			if (!validatePosition(newPlayer.pos, newPlayer.bloco)) loseGame();
+			return newPlayer;
+		});
 	};
 
 	const keyDown = ({ keyCode }) => {
@@ -362,20 +252,20 @@ const Tetris = () => {
 			return;
 		switch (keyCode) {
 			case 37:
-				setPlayer(player => ({ ...player, pos: getNewPlayerPos("left", player) }));
+				setPlayer(player => ({ ...player, pos: getNewPlayerPos("left") }));
 				break;
 			case 38:
 				rotatePlayer();
 				break;
 			case 39:
-				setPlayer(player => ({ ...player, pos: getNewPlayerPos("right", player) }));
+				setPlayer(player => ({ ...player, pos: getNewPlayerPos("right") }));
 				break;
 			case 40:
 				setTick(Date.now());
 				setDown(true);
 				break;
 			case 32:
-				if(spaceReleased) {
+				if (spaceReleased) {
 					setSpaceReleased(false);
 					forwardDown();
 				}
@@ -452,7 +342,7 @@ const Tetris = () => {
 	);
 
 	const getNewPlayerPos = React.useCallback(
-		(movement, player) => {
+		movement => {
 			let newPos;
 			if (!player) return;
 			if (movement === "down") newPos = [player.pos[0] + 1, player.pos[1]];
@@ -483,8 +373,8 @@ const Tetris = () => {
 			if (down) {
 				if (Math.abs(mx - dragX) > THRESHOLD) {
 					if (mx - dragX > 0)
-						setPlayer(player => ({ ...player, pos: getNewPlayerPos("right", player) }));
-					else setPlayer(player => ({ ...player, pos: getNewPlayerPos("left", player) }));
+						setPlayer(player => ({ ...player, pos: getNewPlayerPos("right") }));
+					else setPlayer(player => ({ ...player, pos: getNewPlayerPos("left") }));
 					setDragX(mx);
 				}
 				if (Math.abs(my - dragY) > THRESHOLD) {
@@ -526,8 +416,8 @@ const Tetris = () => {
 				onBlur={() => setPause(true)}
 				onFocus={() => setPause(false)}
 				tabIndex="0"
-				// onKeyUp={keyUp}
-				// onKeyDown={keyDown}
+				onKeyUp={keyUp}
+				onKeyDown={keyDown}
 				onClick={() => rotatePlayer()}
 				{...bind()}
 			/>
@@ -536,4 +426,3 @@ const Tetris = () => {
 };
 
 export default Tetris;
-
